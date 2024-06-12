@@ -1,0 +1,12 @@
+{
+    "name": "enzerhub/1kball",
+    "autoload": {
+        "psr-4": {
+            "Enzerhub\\1kball\\": "src/"
+        }
+    },
+    "require": {
+        "php-webdriver/webdriver": "^1.9",
+        "react/event-loop": "^1.5"
+    }
+}
