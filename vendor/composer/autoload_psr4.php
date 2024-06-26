@@ -9,6 +9,7 @@ return array(
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Symfony\\Component\\Process\\' => array($vendorDir . '/symfony/process'),
     'React\\EventLoop\\' => array($vendorDir . '/react/event-loop/src'),
+    'Predis\\' => array($vendorDir . '/predis/predis/src'),
     'Facebook\\WebDriver\\' => array($vendorDir . '/php-webdriver/webdriver/lib'),
     'Enzerhub\\1kball\\' => array($baseDir . '/src'),
 );

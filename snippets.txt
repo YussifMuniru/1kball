@@ -1,0 +1,154 @@
+<?php
+
+require_once('vendor/autoload.php');
+require_once('index.php');
+require_once('utils/constants.php');
+require_once('utils/date_time.php');
+require_once('db/db_utils.php');
+require_once('classes/class.redis.php');
+
+
+$loop = React\EventLoop\Loop::get();
+
+$res = fetch_all('failed_logins');
+#create event loop
+$timer = $loop->addPeriodicTimer(1, function () {
+    foreach (LOTTERIES_INFO as $key => $value) {
+      # code...
+      // print_r($value);continue;
+      foreach ($value as $val) {
+             
+            $start_end = $val['start_end'];
+            echo "Lottery Name: ". $val['lottery_name']."\n";
+            echo "Got the start end ". $start_end."\n";
+            if(!str_contains($start_end,'~')|| true){
+               $date_time_from_timezone = get_time_in_right_zone($val['timezone']);
+               $date_details = explode(' ',$date_time_from_timezone['shortend_date']);
+               echo "Got the day of the week: ".$date_details[0]."\n";
+               echo "Got the hrs and mins: ".$date_details[1]."\n";
+               if(($date_details[1] == $start_end) || true){
+                // call the get functions to fetch scrape the data from the sites.
+                $valid_fetch_days = explode(',',trim($val['num_mins_per_period']));
+                echo 'Got the valid days: '.implode(',',$valid_fetch_days)."\n";
+                // if(in_array($val['lottery_name'], $valid_lottery_names) || true){
+                if(empty(trim($val['num_mins_per_period'])) || in_array($date_details[0],$valid_fetch_days)){
+                   $function_name = "get_".$val['lottery_name'];
+                   $full_date_time = explode(' ',$date_time_from_timezone['full_date']);
+                   echo "\n\n\n"."Getting data for {$val['lottery_name']}.......... "."\n";
+                   $results       = $function_name($val['link_url']);
+                   if($results['status'] === 'success'){
+                   $results = $results['data'];
+                   $results['draw_date']     = implode('-',array_slice(explode('-',$full_date_time[0]),0,3));
+                   $results['table_name']    = $val['table_name']; 
+                   $results['draw_count']    = str_replace('-','',$results['draw_date']).$results['draw_count']; 
+                   $results['draw_time']     = $full_date_time[1];
+                   $results['date_created']  = $full_date_time[0];
+                   $results['get_time']      = $start_end;
+                   echo "Information fetched Successfully."."\n";
+                   $res = store_draw_number($results);
+                   // check and retry any failed requests
+                   
+                   }else{
+                     echo "Getting data for {$val['lottery_name']}, {$results['data']}"."\n";
+                     if($results['code'] === 1){
+                        // retry this lottery
+                         $res = record_failed_lotteries(array_keys($val,array_values($val)));
+                         if($res['status'] === 'success'){
+                           // if you have successfully stored recorded the failed lottery, then update the session data
+                           $_SESSION[$key."_".$val] = $val;
+                         }else{
+                           // if you have not successfully stored recorded the failed lottery,
+                              if (file_put_contents('logs/failed_lotteries_logs.txt', 'Failed to store the failed login for '.$val['lottery_name'].' on line '.__LINE__.' on file '.__FILE__) === false) {
+                                 echo 'Failed to write data to file.';
+                              } 
+                             echo "\n\n\n\n\n\n********** EMERGENCY!!!! {$val['lottery_name']} TIMEOUT AND COULDN'T BE STORED IN THE DATABASE.REQUIRES MANUAL INSERTION IMMEDIATELY. ************\n\n\n\n\n\n\n";
+
+                         }
+                       
+                     }
+                     if($results['code'] === 2){
+                        echo "\n\n\n\n\n\n********** ELEMENTS HAVE BEING UPDATED FROM SOURCE. ************\n\n\n\n\n\n\n";
+                     }
+                     if($results['code'] === 3){
+                        echo "\n\n\n\n\n\n********** RETRY {$val['lottery_name']} CURL TIMEOUT. ************\n\n\n\n\n\n\n";
+                     }
+                   }
+                   
+                 }else{
+                  // $day = explode('-',explode(' ',$date_time_from_timezone['full_date'])[0])[3];
+                  echo "Wrong day: Today is {$date_details[0]}, the valid days are {$val['num_mins_per_period']}\n\n\n";
+                  // if($res['status'] === 'success'){
+                  // if you have successfully stored recorded the failed lottery, then update the session data
+                   $res = RedisClient::check_and_get_failed_lotteries('failed_lotteries');
+                   if($res['status'] === "success"){
+                      $data = $res['data'];
+                      if(empty($data)){
+                        $data = [$val];
+                      }else{
+                        echo "failed lotteries is not empty";
+                        array_push($data,$val);
+                      }
+                      }else{
+                        echo $res['msg']."\n";
+                     }
+                  RedisClient::store(['key' => 'failed_lotteries', 'value' => json_encode($data)]);
+                 
+               //    }else{
+               // // if you have not successfully stored recorded the failed lottery,
+               // if (file_put_contents('failed_lotteries_logs.txt', 'Failed to store the failed login for '.$val['lottery_name'].' on line '.__LINE__.' on file '.__FILE__) === false) {
+               //    echo 'Failed to write data to file.';
+               // } 
+               
+               // echo "\n\n\n\n\n\n********** EMERGENCY !!!! {$val['lottery_name']} TIMEOUT AND COULDN'T BE STORED IN THE DATABASE. REQUIRES MANUAL INSERTION IMMEDIATELY. ************\n\n\n\n\n\n\n";
+               // }
+                 }
+               
+
+               }else{
+
+                  echo "Not time for a fetch : {$val['lottery_name']}"."\n";
+
+               }
+              
+            }else{
+              // handle date ranges differently 
+               $start_end = explode(',',$start_end);
+               // $lower_time_bound = $start_end[0];
+               // $high_time_bound  = $start_end[1];
+            }
+      }
+    }
+
+   $res = RedisClient::check_and_get_failed_lotteries('failed_lotteries');
+   if($res['status'] === "success"){
+      $data = $res['data'];
+      if(empty($data)){
+          $data = [$val];
+      }else{
+         array_push($data,$val);
+       }
+      }else{
+      echo $res['msg']."\n";
+   }
+RedisClient::store(['key' => 'failed_lotteries', 'value' => json_encode($data)]);
+
+   // echo getHongKongMark6();
+   //echo 'Get Hong Kong Mark 6'."\n";
+});
+echo "Service Engine started"."\n";
+
+
+function retry_failed_lotteries($val){
+   $res = RedisClient::check_and_get_failed_lotteries('failed_lotteries');
+   if($res['status'] === "success"){
+      $data = $res['data'];
+      if(empty($data)){
+          $data = [$val];
+      }else{
+         array_push($data,$val);
+       }
+      }else{
+      echo $res['msg']."\n";
+   }
+RedisClient::store(['key' => 'failed_lotteries', 'value' => json_encode($data)]);
+}

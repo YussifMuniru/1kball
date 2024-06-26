@@ -2,10 +2,12 @@
 
 
 ini_set("display_errors",1);
+require_once("c:/xampp/htdocs/1kball/utils/util_functions.php");
 
 class Database {
 
 public static $pdo;
+public static $mysqli_db;
 public static function openConnection() : pdo | string {
     try {
         self::$pdo = new PDO (
@@ -20,15 +22,44 @@ public static function openConnection() : pdo | string {
          return $th->getMessage();
     }
 }
-public static function closeConnection() : null {
-    return self::$pdo = null;
+public static function open_db_connection() : mysqli | string {
+    try {
+        self::$mysqli_db = new mysqli ("localhost","enzerhub", "enzerhub","lottery");
+        return self::$mysqli_db;
+    } catch (mysqli_sql_exception $e) {
+        echo $e->getMessage();
+        return $e->getMessage();
+    }
+}
+public static function closeConnection($close_pdo = true) : null {
+     if($close_pdo){
+         return self::$pdo = null;
+     }else{
+         return self::$mysqli_db = null;
+     }
+   
 }
 }
 
+function record_failed_lotteries($columns = [],$values){
 
-function store_draw_number(array $args = []){
+      $db = Database::open_db_connection();
+      $values = array_map(function($value) use ($db){
+        return $db->real_escape_string($value);
+      },$values);
+    try{
+         $sql = 'INSERT INTO failed_lotteries ('.implode(',',$columns).') VALUES ('.implode(',',array_map(function($value){return "'$value'";},$values)).')';
+         if($db->query($sql) === TRUE) {
+         return   ['status' => 'success', 'msg' => "Successfully recorded a failed login. "];
+        }
+    }catch(mysqli_sql_exception $e){
+        return ['status' => 'error', 'msg' => "Recording failed for failed logins ". $e->getMessage()];
+    }
+}
+
+function  store_draw_number(array $args = []){
+  
     $table_name   = $args['table_name'];
-    $drawid       = $args['drawid'];
     $draw_date    = $args['draw_date'];
     $draw_count   = $args['draw_count'];
     $draw_number  = $args['draw_number'];
@@ -38,12 +69,11 @@ function store_draw_number(array $args = []){
   
     try {   
     $db = Database::openConnection();
-     $sql = "INSERT INTO {$table_name} (drawid,draw_date,draw_time,draw_number,draw_count,date_created,client,get_time) VALUES (:drawid,:draw_date,:draw_time,:draw_number,:draw_count,:date_created,:client,:get_time)";
+     $sql = "INSERT INTO {$table_name} (draw_date,draw_time,draw_number,draw_count,date_created,client,get_time) VALUES (:draw_date,:draw_time,:draw_number,:draw_count,:date_created,:client,:get_time)";
     // Step 1: Fetch the table name from `gamestable_map` where `dtb_id` = 1
 $stmt = $db->prepare($sql);
 $client = '';
 
-$stmt->bindParam(":drawid",       $drawid);
 $stmt->bindParam(":draw_date",    $draw_date);
 $stmt->bindParam(":draw_time",    $draw_time);
 $stmt->bindParam(":draw_number",  $draw_number);
@@ -54,16 +84,74 @@ $stmt->bindParam(":get_time",     $get_time);
 
 $stmt->execute();
 
-return ['status' => 'success', 'msg' => 'Successfully inserted.'];
+return ['status' => 'success', 'msg' => "Successfully inserted in {$table_name}."];
+  } catch (\PDOException $e) {
+      log_action('DATABASE_ERROR', $e->getMessage()." Draw number to be stored is {$draw_number}, draw count is: {$draw_count} on line ".__LINE__." in file ".__FILE__);
+      return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
+    }
+}
+function fetch_all($table_name){
+    try {   
+    $db = Database::openConnection();
+    $stmt = $db->prepare("SELECT * FROM {$table_name}");
+    $stmt->execute();
+    $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return ['status' => 'success','data' => $res, 'msg' => "Successfully fetched all in {$table_name}."];
+  } catch (\PDOException $e) {
+    return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
+    }
+
+}
+function insert_a_row($table_name, $columns, $values){
+
+    try { 
+     $db = Database::openConnection();
+     $sql = "INSERT INTO {$table_name} (draw_date,draw_time,draw_number,draw_count,date_created,client,get_time) VALUES (:draw_date,:draw_time,:draw_number,:draw_count,:date_created,:client,:get_time)";
+    // Step 1: Fetch the table name from `gamestable_map` where `dtb_id` = 1
+$stmt = $db->prepare($sql);
+$client = '';
+
+$stmt->bindParam(":draw_date",    $draw_date);
+$stmt->bindParam(":draw_time",    $draw_time);
+$stmt->bindParam(":draw_number",  $draw_number);
+$stmt->bindParam(":draw_count",   $draw_count);
+$stmt->bindParam(":date_created", $date_created);
+$stmt->bindParam(":client",       $client);
+$stmt->bindParam(":get_time",     $get_time);
+
+$stmt->execute();
+
+return ['status' => 'success', 'msg' => "Successfully inserted in {$table_name}."];
   } catch (\PDOException $e) {
         //throw $th;
-        return $e->getMessage();
+        return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
     }
 }
 
 
+function delete_all($table_name){
+    try{
 
+     $db = Database::openConnection();
+     $sql = "DELETE FROM {$table_name}";
+     $stmt = $db->prepare($sql);
+     $stmt->execute();
+    }catch(PDOException $e) {
+          return ['status' => 'error', 'msg' => "Deletion from {$table_name} error. ".$e->getMessage()];
+    }
+}
 
+function delete_one($table_name,$id){
+    try{
+     $db = Database::openConnection();
+     $sql = "DELETE FROM {$table_name} WHERE id =:id";
+     $stmt = $db->prepare($sql);
+     $stmt->bindParam(":id",    $id);
+      $stmt->execute();
+    }catch(PDOException $e) {
+          return ['status' => 'error', 'msg' => "Deletion from {$table_name} error. ".$e->getMessage()];
+    }
+}
 function fetchDrawNumbers($lottery_id){
     try{
          $lottery_id = intval($lottery_id);
@@ -112,8 +200,3 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   
 }
-
-
-
-// echo json_encode(recenLotteryIsue(1));
-

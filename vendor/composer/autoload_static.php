@@ -21,6 +21,10 @@ class ComposerStaticInitbd4885e4504b5850d3c46d7d52781f0c
         array (
             'React\\EventLoop\\' => 16,
         ),
+        'P' => 
+        array (
+            'Predis\\' => 7,
+        ),
         'F' => 
         array (
             'Facebook\\WebDriver\\' => 19,
@@ -43,6 +47,10 @@ class ComposerStaticInitbd4885e4504b5850d3c46d7d52781f0c
         'React\\EventLoop\\' => 
         array (
             0 => __DIR__ . '/..' . '/react/event-loop/src',
+        ),
+        'Predis\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/predis/predis/src',
         ),
         'Facebook\\WebDriver\\' => 
         array (
