@@ -39,6 +39,7 @@ echo "Service Engine started"."\n";
 
 function perform_data_query($current_time_utc,$val){
       $start_end = $val['start_end'];
+     
       echo $val['lottery_name']."\n";
       $date_time_from_timezone = get_time_in_right_zone($val['timezone']);
       $date_details = explode(' ',$date_time_from_timezone['shortend_date']);
@@ -53,7 +54,8 @@ function perform_data_query($current_time_utc,$val){
                 // get the valid fetch days for the current iteration of the lotteries.
                 $valid_fetch_days = explode(',',trim($val['num_mins_per_period']));
             if(empty(trim($val['num_mins_per_period'])) || in_array($date_details[0],$valid_fetch_days)){
-
+                   // fetch the latest stored draw number
+                   $res = fetch_one($val['table_name']);
                    // get and call the appropriate service function
                    $function_name  = "get_".$val['lottery_name'];
                    $full_date_time = explode(' ',$date_time_from_timezone['full_date']);
@@ -71,10 +73,13 @@ function perform_data_query($current_time_utc,$val){
 
                    // store the draw number and related data in the db
                    $res = store_draw_number($results);
-
+                         
                    // on success check and remove any failed lottery from the redis cache
                    // that matches the just stored draw number
-                   if($res['status'] === 'success')  $res = RedisClient::remove_failed_lottery($current_time_utc);
+                   if($res['status'] === 'success'){
+                      echo $res['msg']."\n";
+                      $res = RedisClient::remove_failed_lottery($current_time_utc);
+                   } 
                    
                    // check and retry any failed requests
                    }else{
@@ -103,6 +108,9 @@ function perform_data_query($current_time_utc,$val){
                      }
                      if($results['code'] === 3){
                         file_put_contents('logs/failed_lotteries_logs.txt', "CURLTIMEOUTEXCEPTION:: {$val['lottery_name']} Curl time out with a url of ({$val['link_url']}) \n");
+                     }
+                     if($results['code'] === 4){
+                        file_put_contents('logs/failed_lotteries_logs.txt', "SESSIONNOTCREATEDEXCEPTION:: {$val['lottery_name']} Could not start a new session with a url of ({$val['link_url']}) and error msg of {$res['msg']}\n");
                      }
                    }
                    

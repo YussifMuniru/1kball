@@ -102,6 +102,18 @@ function fetch_all($table_name){
     }
 
 }
+function fetch_one($table_name,string $ordery_by = 'DESC'){
+    try {   
+    $db = Database::openConnection();
+    $stmt = $db->prepare("SELECT draw_number FROM {$table_name} LIMIT 1 ORDER BY {$ordery_by}");
+    $stmt->execute();
+    $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return ['status' => 'success','data' => $res];
+  } catch (\PDOException $e) {
+    return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
+    }
+
+}
 function insert_a_row($table_name, $columns, $values){
 
     try { 
@@ -127,7 +139,6 @@ return ['status' => 'success', 'msg' => "Successfully inserted in {$table_name}.
         return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
     }
 }
-
 
 function delete_all($table_name){
     try{

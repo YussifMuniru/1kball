@@ -10,20 +10,10 @@ use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Exception\TimeoutException;
 use Facebook\WebDriver\Exception\NoSuchElementException;
 use Facebook\WebDriver\Exception\Internal\WebDriverCurlException;
+use Facebook\WebDriver\Exception\SessionNotCreatedException;
 
 $host = 'http://localhost:4444'; // URL of the Selenium server
-$lottery_urls = [
-    'belgium_3d'      => 'https://www.nationale-loterij.be/onze-spelen/pick3/uitslagen-trekking/13-08-2023?', 
-    'china_3d'        => 'https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=102', 
-    'china_p5'        => 'https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=203',
-    'china_happy8'    => 'https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=104',
-    'china_7_stars'   => 'https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=204',
-    'taiwan'          => 'https://www.taiwanlottery.com/lotto/result/3_d',
-    'taiwan_4d'       => 'https://www.taiwanlottery.com/lotto/result/4_d',
-    'taiwan_bingo'    => 'https://www.taiwanlottery.com/lotto/result/bingo_bingo?searchData=true', 
-    'taiwan_lotto'    => 'https://www.taiwanlottery.com/lotto/result/lotto649', 
-    'hong_kong_mark6' => 'https://bet.hkjc.com/marksix/Results.aspx?lang=ch'
-];
+
 
 
 function get_driver(string $url): RemoteWebDriver{
@@ -31,12 +21,23 @@ function get_driver(string $url): RemoteWebDriver{
 
     // Set up Chrome options to enable headless mode
     $options = new ChromeOptions();
-    $options->addArguments(['--headless', '--disable-gpu', '--window-size=1280,1024']);
-    $options->addArguments(['--headless', '--disable-gpu', '--window-size=1920,1080']);
+    $options->addArguments(['--headless', '--disable-gpu', '--window-size=1920,1080',]);
     $capabilities = DesiredCapabilities::chrome();
     $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
 
     $driver = RemoteWebDriver::create($host, $capabilities);
+    $handles = $driver->getWindowHandles();
+    foreach ($handles as $handle) {
+    $driver->switchTo()->window($handle);
+    if (count($handles) > 1) {
+        $driver->close();
+    }
+  }
+  // // After closing all but one window, switch to the last window and close it
+  // if (count($handles) > 0) {
+  //     $driver->switchTo()->window($handles[0]);
+  //     $driver->close();
+  // }
     return $driver->get($url);
     
 }
@@ -66,11 +67,13 @@ function get_hong_kong_mark6($lottery_url){
     return ['status' => 'success', 'data' => ['draw_count' =>  $draw_count, 'draw_number'=> $draw_numbers]];
 
     }catch(TimeoutException  $e){
-     return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+     return ['status' => 'error','code' => 1,'data' => 'Timeout.']; 
     }catch(NoSuchElementException  $e){
-     return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+     return ['status' => 'error','code' => 2,'data' => 'No such element.']; 
     }catch(WebDriverCurlException  $e){
-     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout.']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
    
 }
@@ -99,6 +102,8 @@ function get_belgium_3d($lottery_url){
      return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 
 
@@ -123,6 +128,8 @@ function get_china_3d($lottery_url){
      return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 }
 function get_china_happy8($lottery_url){
@@ -143,8 +150,12 @@ function get_china_happy8($lottery_url){
     return ['status' => 'success', 'data' => ['draw_count' => substr($issue_number,-4), 'draw_number'=> implode(',',$draw_number)]];
      }catch(TimeoutException  $e){
      return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+     return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 }
 function get_china_7_stars($lottery_url){
@@ -168,6 +179,8 @@ function get_china_7_stars($lottery_url){
      return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 }
 function get_china_p5($lottery_url){
@@ -191,6 +204,8 @@ function get_china_p5($lottery_url){
      return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 }
 function get_taiwan_3d($lottery_url){
@@ -220,6 +235,8 @@ function get_taiwan_3d($lottery_url){
      return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 }
 function get_taiwan_4d($lottery_url){
@@ -249,6 +266,8 @@ function get_taiwan_4d($lottery_url){
     return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 }
 function get_taiwan_lotto($lottery_url){
@@ -278,6 +297,8 @@ function get_taiwan_lotto($lottery_url){
     return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
    
 }
@@ -309,6 +330,8 @@ function get_taiwan_bingo($lottery_url){
     return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 }
 
@@ -332,6 +355,8 @@ function get_five_de_oro_5_48($lottery_url){
     return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 }
 function get_sixaus49_6_49($lottery_url){
@@ -353,6 +378,8 @@ function get_sixaus49_6_49($lottery_url){
     return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 }
 function get_all_or_nothing_day_texas_12_24($lottery_url){
@@ -370,19 +397,20 @@ function get_all_or_nothing_day_texas_12_24($lottery_url){
     $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
     $draw_number = [];
     foreach ($draw_number_parent as $val) {
-      # code...
       $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
     }
     
     $driver->quit();
-    $draw_count = $_SESSION['all_or_nothing_day_texas_12_24'] = isset($_SESSION['all_or_nothing_day_texas_12_24']) ? intval($_SESSION['all_or_nothing_day_texas_12_24']) + 1 : 1;
-    return ['status' => 'success', 'data' => ['draw_count' =>  $draw_count, 'draw_number'=> implode(',',$draw_number)]];
+   
+    return ['status' => 'success', 'data' => ['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
     }catch(TimeoutException  $e){
     return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
     }catch(NoSuchElementException  $e){
     return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 
 }
@@ -405,6 +433,8 @@ function get_arizona_triple_twist_6_42($lottery_url){
     return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
 }
 
@@ -429,8 +459,11 @@ function get_atlantic_6_49($lottery_url){
     return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.' .$e->getMessage()]; 
     }
 }
+
 function get_australia_powerball_7_35($lottery_url){
   try{
       $driver = get_driver($lottery_url);
@@ -451,7 +484,407 @@ function get_australia_powerball_7_35($lottery_url){
     return ['status' => 'error','code' => 2,'data' => 'No such element']; 
     }catch(WebDriverCurlException  $e){
      return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
     }
     
   }
 
+  function get_badger_5_5_31($lottery_url){
+  try{
+      $host = 'http://localhost:4444'; // URL of the Selenium server
+        // Set up Chrome options to enable headless mode
+      $options = new ChromeOptions();
+      $capabilities = DesiredCapabilities::chrome();
+      $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+      $driver = RemoteWebDriver::create($host, $capabilities);
+      $driver = $driver->get($lottery_url);
+      $wait = new WebDriverWait($driver, 10);
+      $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('resultsgame')));
+      $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('.resultsnums li'));
+      $draw_number = [];
+      foreach ($draw_number_parent as $val) {
+        array_push($draw_number, $val->getText());
+      }
+      $driver->quit();
+      return ['status' => 'success', 'data' =>['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+
+    }catch(TimeoutException  $e){
+      echo $e->getMessage() . "\n";
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+    
+  }
+  function get_baloto_5_43($lottery_url){
+  try{
+      $driver = get_driver($lottery_url);
+      $wait = new WebDriverWait($driver, 10);
+      $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('scp-list')));
+      $parent_element = $parent_element->findElement(WebDriverBy::cssSelector('.ng-star-inserted'));
+      $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('.absolute'));
+      $draw_number = [];
+      foreach ($draw_number_parent as $val) {
+        array_push($draw_number, $val->getText());
+      }
+      $driver->quit();
+      return ['status' => 'success', 'data' =>['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+
+    }catch(TimeoutException  $e){
+      echo $e->getMessage() . "\n";
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+    
+  }
+  function get_banco_20_70($lottery_url){
+  try{
+      $host = 'http://localhost:4444'; // URL of the Selenium server
+
+      // Set up Chrome options to enable headless mode
+      $options = new ChromeOptions();
+       //$options->addArguments(['--headless', '--disable-gpu', '--window-size=1920,1080',]);
+      $userDataDir = "C:\Users\Administrator\AppData\Local\Google\Chrome\User Data\Profile 6";
+      $options->addArguments(["user-data-dir={$userDataDir}"]);
+      $capabilities = DesiredCapabilities::chrome();
+      $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+      $driver = RemoteWebDriver::create($host, $capabilities);
+      $driver = $driver->get($lottery_url);
+      $wait = new WebDriverWait($driver, 10);
+      $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('restbl')));
+      $parent_element = $parent_element->findElement(WebDriverBy::cssSelector('tbody'));
+      $draw_number_table_row = $parent_element->findElement(WebDriverBy::cssSelector('tr:nth-child(2)'));
+      $draw_number_parent = $draw_number_table_row->findElements(WebDriverBy::cssSelector('li'));
+      $draw_count = $draw_number_table_row->findElement(WebDriverBy::cssSelector('td:first-child'));
+      $draw_count = $draw_count->getText();
+      $draw_number = [];
+      foreach ($draw_number_parent as $val) {
+        array_push($draw_number, $val->getText());
+      }
+      $driver->quit();
+      return ['status' => 'success', 'data' =>['draw_count' => str_replace(".","",$draw_count), 'draw_number'=> implode(',',$draw_number)]];
+
+    }catch(TimeoutException  $e){
+      echo $e->getMessage() . "\n";
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+    
+  }
+  function get_belgium_lotto_6_45($lottery_url){
+  try{
+    $driver = get_driver($lottery_url);
+    $wait = new WebDriverWait($driver, 10);
+    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('game-number')));
+    $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
+    $draw_number = [];
+    foreach ($draw_number_parent as $val) {
+      array_push($draw_number, $val->getText());
+    }
+      $driver->quit();
+      return ['status' => 'success', 'data' =>['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+
+    }catch(TimeoutException  $e){
+      echo $e->getMessage() . "\n";
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+    
+  }
+
+function get_bonoloto_6_49($lottery_url){
+  try{
+      $driver = get_driver($lottery_url);
+      $wait = new WebDriverWait($driver, 10);
+      $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('scp-list')));
+      $parent_element = $parent_element->findElement(WebDriverBy::cssSelector('.ng-star-inserted'));
+      $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('.absolute'));
+      $draw_number = [];
+      foreach ($draw_number_parent as $val) {
+        array_push($draw_number, $val->getText());
+      }
+      $driver->quit();
+      return ['status' => 'success', 'data' =>['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+
+    }catch(TimeoutException  $e){
+      echo $e->getMessage() . "\n";
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+    
+  }
+function get_bonus_match_5_5_39($lottery_url){
+     try{
+      $host = 'http://localhost:4444'; // URL of the Selenium server
+
+     // Set up Chrome options to enable headless mode
+    $options = new ChromeOptions();
+    $capabilities = DesiredCapabilities::chrome();
+    $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+    $driver = RemoteWebDriver::create($host, $capabilities);
+    $driver = $driver->get($lottery_url);
+    $wait = new WebDriverWait($driver, 10);
+    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('resultsnums')));
+    $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
+    $draw_number = [];
+    foreach ($draw_number_parent as $val) {
+      $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
+    }
+    $driver->quit();
+    return ['status' => 'success', 'data' => ['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+    }catch(TimeoutException  $e){
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+
+}
+function get_bucko_5_41($lottery_url){
+     try{
+      $host = 'http://localhost:4444'; // URL of the Selenium server
+
+     // Set up Chrome options to enable headless mode
+    $options = new ChromeOptions();
+    $capabilities = DesiredCapabilities::chrome();
+    $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+    $driver = RemoteWebDriver::create($host, $capabilities);
+    $driver = $driver->get($lottery_url);
+    $wait = new WebDriverWait($driver, 10);
+    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('resultsnums')));
+    $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
+    $draw_number = [];
+    foreach ($draw_number_parent as $val) {
+      $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
+    }
+    $driver->quit();
+    return ['status' => 'success', 'data' => ['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+    }catch(TimeoutException  $e){
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+
+}
+
+
+function get_carolina_cash_5_5_43($lottery_url){
+  try{
+      $driver = get_driver($lottery_url);
+      $wait = new WebDriverWait($driver, 10);
+      $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('scp-list')));
+      $parent_element = $parent_element->findElement(WebDriverBy::cssSelector('.ng-star-inserted'));
+      $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('.absolute'));
+      $draw_number = [];
+      foreach ($draw_number_parent as $val) {
+        array_push($draw_number, $val->getText());
+      }
+      $driver->quit();
+      return ['status' => 'success', 'data' =>['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+
+    }catch(TimeoutException  $e){
+      echo $e->getMessage() . "\n";
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+    
+  }
+
+function get_cash_25_west_virginia_6_25($lottery_url){
+     try{
+    $host = 'http://localhost:4444'; // URL of the Selenium server
+     // Set up Chrome options to enable headless mode
+    $options = new ChromeOptions();
+    $capabilities = DesiredCapabilities::chrome();
+    $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+    $driver = RemoteWebDriver::create($host, $capabilities);
+    $driver = $driver->get($lottery_url);
+    $wait = new WebDriverWait($driver, 10);
+    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('resultsnums')));
+    $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
+    $draw_number = [];
+    foreach ($draw_number_parent as $val) {
+      $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
+    }
+    $driver->quit();
+    return ['status' => 'success', 'data' => ['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+    }catch(TimeoutException  $e){
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+
+}
+function get_cash_5_colorado_5_32($lottery_url){
+     try{
+    $driver = get_driver($lottery_url);
+    $wait = new WebDriverWait($driver, 10);
+    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('draw')));
+      $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('.draw span'));
+      $draw_number = [];
+      foreach ($draw_number_parent as $val) {
+        array_push($draw_number, $val->getText());
+      }
+      $driver->quit();
+    return ['status' => 'success', 'data' => ['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+    }catch(TimeoutException  $e){
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+
+}
+function get_cash_5_connecticut_5_35($lottery_url){
+     try{
+    $driver = get_driver($lottery_url);
+    $wait = new WebDriverWait($driver, 10);
+    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::id('gvWinningNumbers')));
+    $draw_number_parent = $parent_element->findElement(WebDriverBy::cssSelector('tr td:nth-child(2) '));
+    $draw_number = str_replace("-",",",str_replace(' ','',$draw_number_parent->getText()));
+    $driver->quit();
+    return ['status' => 'success', 'data' => ['draw_count' => '', 'draw_number'=> $draw_number]];
+    }catch(TimeoutException  $e){
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+
+}
+
+function get_cash_5_indiana_5_45($lottery_url){
+     try{
+    $host = 'http://localhost:4444'; // URL of the Selenium server
+     // Set up Chrome options to enable headless mode
+    $options = new ChromeOptions();
+    $capabilities = DesiredCapabilities::chrome();
+    $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+    $driver = RemoteWebDriver::create($host, $capabilities);
+    $driver = $driver->get($lottery_url);
+    $wait = new WebDriverWait($driver, 10);
+    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('resultsnums')));
+    $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
+    $draw_number = [];
+    foreach ($draw_number_parent as $val) {
+      $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
+    }
+    $driver->quit();
+    return ['status' => 'success', 'data' => ['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+    }catch(TimeoutException  $e){
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+
+}
+
+function get_cash_5_new_jersey_5_45($lottery_url){
+     try{
+    $host = 'http://localhost:4444'; // URL of the Selenium server
+     // Set up Chrome options to enable headless mode
+    $options = new ChromeOptions();
+    $capabilities = DesiredCapabilities::chrome();
+    $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+    $driver = RemoteWebDriver::create($host, $capabilities);
+    $driver = $driver->get($lottery_url);
+    $wait = new WebDriverWait($driver, 10);
+    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('resultsnums')));
+    $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
+    $draw_number = [];
+    foreach ($draw_number_parent as $val) {
+      $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
+    }
+    $driver->quit();
+    return ['status' => 'success', 'data' => ['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+    }catch(TimeoutException  $e){
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+
+}
+function get_cash_5_pennsylvania_5_43($lottery_url){
+     try{
+    $host = 'http://localhost:4444'; // URL of the Selenium server
+     // Set up Chrome options to enable headless mode
+    $options = new ChromeOptions();
+    $capabilities = DesiredCapabilities::chrome();
+    $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+    $driver = RemoteWebDriver::create($host, $capabilities);
+    $driver = $driver->get($lottery_url);
+    $wait = new WebDriverWait($driver, 10);
+    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('resultsnums')));
+    $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
+    $draw_number = [];
+    foreach ($draw_number_parent as $val) {
+      $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
+    }
+    $driver->quit();
+    return ['status' => 'success', 'data' => ['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+    }catch(TimeoutException  $e){
+    return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
+    }catch(NoSuchElementException  $e){
+    return ['status' => 'error','code' => 2,'data' => 'No such element']; 
+    }catch(WebDriverCurlException  $e){
+     return ['status' => 'error','code' => 3,'data' => 'Curl Timeout']; 
+    }catch(SessionNotCreatedException  $e){
+     return ['status' => 'error','code' => 4,'data' => 'Session not created.']; 
+    }
+
+}

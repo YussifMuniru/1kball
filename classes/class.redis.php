@@ -9,7 +9,7 @@ class RedisClient {
 {
 
     try {
-        $redis = new \Predis\Client();
+        $redis =self::get_redis_cli();
         $redis->set($data['key'], $data['value']);
         return ['status' => true, 'msg' => "success"];
     } catch (Throwable $th) {
@@ -48,7 +48,7 @@ class RedisClient {
           $redis = self::get_redis_cli();
           $res = json_decode($redis->get("failed_lotteries"),true);
           unset($res[$key]);
-          return store($res);
+          return self::store(['key' =>'failed_lotteries','value'=> json_encode($res)]);
     } catch (Throwable $th) {
          log_action('REDIS_ERROR', $th->getMessage()." on line".__LINE__." in file ".__FILE__);
         return ['status' => 'success', 'msg' => "Redis error: line ( " . __LINE__ . " )"];

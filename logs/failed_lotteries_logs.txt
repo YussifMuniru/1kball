@@ -1,1 +1,2 @@
-
+SESSIONNOTCREATEDEXCEPTION:: banco_20_70 Could not start a new session with a url of (https://www.theluckygene.com/LotteryResults?gid=QuebecBanco) and error msg of success
+DATABASE_ERROR:: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'lottery.cash_5_indiana_5_45_1kb' doesn't exist Draw number to be stored is 10,16,20,37,45, draw count is: 20240627 on line 89 in file C:\xampp\htdocs\1kball\db\db_utils.php 
