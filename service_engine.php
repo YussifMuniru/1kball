@@ -60,27 +60,52 @@ function perform_data_query($current_time_utc,$val){
                    $function_name  = "get_".$val['lottery_name'];
                    $full_date_time = explode(' ',$date_time_from_timezone['full_date']);
                    $results        = $function_name($val['link_url']);
-                   
+                   $multiple_draws = $results['multiple_draws'];
                   // if fetching the data is successful, organize and store it.
                if($results['status'] === 'success'){
                    $results = $results['data'];
-                   $results['draw_date']     = implode('-',array_slice(explode('-',$full_date_time[0]),0,3));
-                   $results['table_name']    = $val['table_name']; 
-                   $results['lottery_name']    = $val['lottery_name']; 
-                   $results['draw_count']    = str_replace('-','',$results['draw_date']).$results['draw_count']; 
-                   $results['draw_time']     = $full_date_time[1];
-                   $results['date_created']  = $full_date_time[0];
-                   $results['get_time']      = $start_end;
 
-                   // store the draw number and related data in the db
-                   $res = store_draw_number($results);
-                         
-                   // on success check and remove any failed lottery from the redis cache
-                   // that matches the just stored draw number
-                   if($res['status'] === 'success'){
-                      echo $res['msg']."\n";
-                      $res = RedisClient::remove_failed_lottery($current_time_utc);
-                   } 
+                   if($multiple_draws){
+                     foreach($results as $result){
+                    
+                     $result['table_name']      = $val['table_name']; 
+                     $result['lottery_name']    = $val['lottery_name']; 
+                     $result['draw_count']      = str_replace('-','',$result['converted_date']).$result['draw_count']; 
+                     $result['draw_time']       = $full_date_time[1];
+                     $result['date_created']    = $result['converted_date']."-".$result['draw_day'];
+                     $result['get_time']        = $start_end;
+
+                     // store the draw number and related data in the db
+                     $res = store_draw_number($result);
+                           
+                     // on success check and remove any failed lottery from the redis cache
+                     // that matches the just stored draw number
+                     if($res['status'] === 'success'){
+                        echo $res['msg']."\n";
+                        $res = RedisClient::remove_failed_lottery($current_time_utc);
+                     } 
+                     }
+                    
+                   }else{
+                     $results['draw_date']     = implode('-',array_slice(explode('-',$full_date_time[0]),0,3));
+                     $results['table_name']    = $val['table_name']; 
+                     $results['lottery_name']    = $val['lottery_name']; 
+                     $results['draw_count']    = str_replace('-','',$results['draw_date']).$results['draw_count']; 
+                     $results['draw_time']     = $full_date_time[1];
+                     $results['date_created']  = $full_date_time[0];
+                     $results['get_time']      = $start_end;
+
+                     // store the draw number and related data in the db
+                     $res = store_draw_number($results);
+                           
+                     // on success check and remove any failed lottery from the redis cache
+                     // that matches the just stored draw number
+                     if($res['status'] === 'success'){
+                        echo $res['msg']."\n";
+                        $res = RedisClient::remove_failed_lottery($current_time_utc);
+                     } 
+                   }
+                  
                    
                    // check and retry any failed requests
                    }else{

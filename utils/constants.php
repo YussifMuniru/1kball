@@ -33,8 +33,8 @@ $lotteries_info = [
      
 ];
 
-// $lotteries_info = [
-//      '16:25' => [['lottery_name'=>'sixaus49_6_49','lottery_type' => '6/49','link_url'=> 'https://www.lotto.net/german-lotto/results/2024', 'period' => 1,'start_end' => '18:25', 'num_mins_per_period' => '', 'country' => 'Germany', 'timezone' => 'Europe/Berlin', 'table_name' => 'sixaus49_6_49_1kb',]], 
-//    ];
+$lotteries_info = [
+     '16:25' => [['lottery_name'=>'sixaus49_6_49','lottery_type' => '6/49','link_url'=> 'https://www.lotto.net/german-lotto/results/2024', 'period' => 1,'start_end' => '18:25', 'num_mins_per_period' => '', 'country' => 'Germany', 'timezone' => 'Europe/Berlin', 'table_name' => 'sixaus49_6_49_1kb',]], 
+   ];
  
 !defined('LOTTERIES_INFO') ? define('LOTTERIES_INFO',$lotteries_info) : false;
