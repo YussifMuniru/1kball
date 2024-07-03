@@ -2,7 +2,7 @@
 
 $lotteries_info = [
    '16:25' => [['lottery_name'=>'sixaus49_6_49','lottery_type' => '6/49','link_url'=> 'https://www.lotto.net/german-lotto/results/2024', 'period' => 1,'start_end' => '18:25', 'num_mins_per_period' => 'Wednesday', 'country' => 'Germany', 'timezone' => 'Europe/Berlin', 'table_name' => 'sixaus49_6_49_1kb',]],      
-   '17:25' => [['lottery_name'=>'sixaus49_6_49','lottery_type' => '6/49','link_url'=> 'https://www.lotto.net/german-lotto/results/2024', 'period' => 1,'start_end' => '19:25', 'num_mins_per_period' => 'Wednesday', 'country' => 'Germany', 'timezone' => 'Europe/Berlin', 'table_name' => 'sixaus49_6_49_1kb',]],      
+   '17:25' => [['lottery_name'=>'sixaus49_6_49','lottery_type' => '6/49','link_url'=> 'https://www.lotto.net/german-lotto/results/2024', 'period' => 1,'start_end' => '19:25', 'num_mins_per_period' => 'Saturday', 'country' => 'Germany', 'timezone' => 'Europe/Berlin', 'table_name' => 'sixaus49_6_49_1kb',]],      
    '15:00' => [['lottery_name'=>'all_or_nothing_day_texas_12_24','lottery_type' => '12/24','link_url'=> 'https://www.lotterypost.com/results/tx/allornothing', 'period' => 1,'start_end' => '10:00', 'num_mins_per_period' => 'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday', 'country' => 'USA', 'timezone' => 'America/Chicago', 'table_name' => 'all_or_nothing_day_texas_12_24_1kb',]],      
    '17:27' => [['lottery_name'=>'all_or_nothing_day_texas_12_24','lottery_type' => '12/24','link_url'=> 'https://www.lotterypost.com/results/tx/allornothing', 'period' => 1,'start_end' => '12:27',  'num_mins_per_period' => 'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday','country' => 'USA', 'timezone' => 'America/Chicago', 'table_name' => 'all_or_nothing_day_texas_12_24_1kb',]],      
    '11:00' => [['lottery_name'=>'all_or_nothing_day_texas_12_24','lottery_type' => '12/24','link_url'=> 'https://www.lotterypost.com/results/tx/allornothing', 'period' => 1,'start_end' => '06:00',  'num_mins_per_period' => 'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday', 'country' => 'USA', 'timezone' => 'America/Chicago', 'table_name' => 'all_or_nothing_day_texas_12_24_1kb',]],      
@@ -33,8 +33,8 @@ $lotteries_info = [
      
 ];
 
-$lotteries_info = [
-    '23:59' => [['lottery_name'=>'cash_5_pennsylvania_5_43','lottery_type' => '5/43','link_url'=> 'https://www.lotterypost.com/results/pa/cash5/past', 'period' => 1,'start_end' => '18:59', 'num_mins_per_period' => '', 'timezone' => 'America/New_York', 'table_name' => 'cash_5_pennsylvania_5_435_1kb',]],
-   ];
+// $lotteries_info = [
+//      '16:25' => [['lottery_name'=>'sixaus49_6_49','lottery_type' => '6/49','link_url'=> 'https://www.lotto.net/german-lotto/results/2024', 'period' => 1,'start_end' => '18:25', 'num_mins_per_period' => '', 'country' => 'Germany', 'timezone' => 'Europe/Berlin', 'table_name' => 'sixaus49_6_49_1kb',]], 
+//    ];
  
 !defined('LOTTERIES_INFO') ? define('LOTTERIES_INFO',$lotteries_info) : false;

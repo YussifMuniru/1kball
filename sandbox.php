@@ -13,52 +13,59 @@ require_once('C:/xampp/htdocs/1kball/utils/constants.php');
 require_once('utils/date_time.php');
 require_once('db/db_utils.php');
 
-  //  $host = 'http://localhost:4444'; // URL of the Selenium server
+    $host = 'http://localhost:4444'; // URL of the Selenium server
 
-  // // Set up Chrome options to enable headless mode
-  //   $options = new ChromeOptions();
-  // //  $options->addArguments(['--headless', '--disable-gpu', '--window-size=1920,1080',]);
-  //   // $userDataDir = "C:\Users\Administrator\AppData\Local\Google\Chrome\User Data\Profile 6";
-  //   // $options->addArguments(["user-data-dir={$userDataDir}"]);
-  //   $capabilities = DesiredCapabilities::chrome();
-  //   $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
-  //   $driver = RemoteWebDriver::create($host, $capabilities);
-
-
-  //   // $driver = $driver->get('https://www.taiwanlottery.com/lotto/result/lotto649');
-  //   // $driver = $driver->get('https://www.taiwanlottery.com/lotto/result/bingo_bingo?searchData=true');
-  //   // $driver = $driver->get('https://www.taiwanlottery.com/lotto/result/4_d');
-  //   // $driver = $driver->get('https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=204');
-  //   // $driver = $driver->get('https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=104');
-  //   // $driver = $driver->get('https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=102');
-  //   // $driver = $driver->get('https://www.nationale-loterij.be/onze-spelen/pick3/uitslagen-trekking/');
-  //   // $driver = $driver->get('https://lotterytexts.com/uruguay/5-de-oro/');
-  //   // $driver = $driver->get('https://www.lotto.net/german-lotto/results/2024');
-  //   // $driver = $driver->get('https://www.lotterypost.com/results/tx/allornothing');
-  //   // $driver = $driver->get('https://www.arizonalottery.com/draw-games/triple-twist/');
-  //   // $driver = $driver->get('https://www.alc.ca/content/alc/en/winning-numbers.html');
-  //   // $driver = $driver->get('https://australia.national-lottery.com/powerball/results');
-  //   // $driver = $driver->get('https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=203');
-  //   // $driver = $driver->get('https://bet.hkjc.com/marksix/Results.aspx?lang=en');
-  //   //$driver = $driver->get('https://www.lotterypost.com/results/wi/badger5/past');
-  //  // $driver = $driver->get('https://yesplay.bet/lucky-numbers/colombia_baloto/results');
-  //  // $driver = $driver->get('https://lotteryguru.com/belgium-lottery-results/be-lotto/be-lotto-results-history');
-  //   // $driver = $driver->get('https://yesplay.bet/lucky-numbers/spain_daily_6_from_49/results');
-  //   // $driver = $driver->get('https://www.lotterypost.com/results/md/bonusmatch5/past');
-  //   // $driver = $driver->get('https://www.lotterypost.com/results/ac/bucko/past');
-  //   // $driver = $driver->get('https://yesplay.bet/lucky-numbers/usa_north_carolina_cash_5/results');
-  //   // $driver = $driver->get('https://www.coloradolottery.com/en/games/cash5/drawings/');
-  //   $driver = $driver->get('https://www.lotterypost.com/results/nj/jerseycash5/past');
-  //   // try{
-  //   $wait = new WebDriverWait($driver, 10);
-  //   $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('resultsnums')));
-  //   $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
-  //   $draw_number = [];
-  //   foreach ($draw_number_parent as $val) {
-  //     $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
-  //   }
-  //   $driver->quit();
-  //     echo json_encode(['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]);
+    // Set up Chrome options to enable headless mode
+    $options = new ChromeOptions();
+    $options->addArguments(["--headless",'--disable-gpu', '--window-size=1920,1080',]);
+    // $userDataDir = "C:\Users\Administrator\AppData\Local\Google\Chrome\User Data\Profile 6";
+    // $options->addArguments(["user-data-dir={$userDataDir}"]);
+    $capabilities = DesiredCapabilities::chrome();
+    $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+    $driver = RemoteWebDriver::create($host, $capabilities); 
+    // // $driver = $driver->get('https://www.taiwanlottery.com/lotto/result/lotto649');
+    // // $driver = $driver->get('https://www.taiwanlottery.com/lotto/result/bingo_bingo?searchData=true');
+    // // $driver = $driver->get('https://www.taiwanlottery.com/lotto/result/4_d');
+    // // $driver = $driver->get('https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=204');
+    // // $driver = $driver->get('https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=104');
+    // // $driver = $driver->get('https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=102');
+    // // $driver = $driver->get('https://www.nationale-loterij.be/onze-spelen/pick3/uitslagen-trekking/');
+    // // $driver = $driver->get('https://lotterytexts.com/uruguay/5-de-oro/');
+    // // $driver = $driver->get('https://www.lotto.net/german-lotto/results/2024');
+    // // $driver = $driver->get('https://www.lotterypost.com/results/tx/allornothing');
+    // // $driver = $driver->get('https://www.arizonalottery.com/draw-games/triple-twist/');
+    // // $driver = $driver->get('https://www.alc.ca/content/alc/en/winning-numbers.html');
+    // // $driver = $driver->get('https://australia.national-lottery.com/powerball/results');
+    // // $driver = $driver->get('https://sports.sina.com.cn/l/kaijiang/detail.shtml?game=203');
+    // // $driver = $driver->get('https://bet.hkjc.com/marksix/Results.aspx?lang=en');
+    // //$driver = $driver->get('https://www.lotterypost.com/results/wi/badger5/past');
+    // / $driver = $driver->get('https://yesplay.bet/lucky-numbers/colombia_baloto/results');
+    // / $driver = $driver->get('https://lotteryguru.com/belgium-lottery-results/be-lotto/be-lotto-results-history');
+    // // $driver = $driver->get('https://yesplay.bet/lucky-numbers/spain_daily_6_from_49/results');
+    // // $driver = $driver->get('https://www.lotterypost.com/results/md/bonusmatch5/past');
+    // // $driver = $driver->get('https://www.lotterypost.com/results/ac/bucko/past');
+    // // $driver = $driver->get('https://yesplay.bet/lucky-numbers/usa_north_carolina_cash_5/results');
+    // // $driver = $driver->get('https://www.coloradolottery.com/en/games/cash5/drawings/');
+    // $driver = $driver->get('https://www.lotto.net/german-lotto/results/2024');
+    // $driver->manage()->window()->maximize();
+    
+    // $wait = new WebDriverWait($driver, 10);
+    // $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('balls')));
+    // $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
+    // $draw_number = [];
+   $res = get_time_in_right_zone("Europe/Berlin")['full_date'];
+   $separated_date =  explode('-',explode(" ",$res)[0]);
+   $res = implode('-',array_slice($separated_date,0,3));
+   $new_date_time = new DateTime($res);
+   echo strtolower($new_date_time->format('F jS, Y'));
+   echo $week_day = strtoupper($separated_date[3]);
+    // foreach ($draw_number_parent as $val) {
+     
+    //   $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
+    // }
+    //    $driver->quit();
+   
+    //    echo json_encode(['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]);
 
     //return ['draw_count' => substr($issue_number,-4), 'draw_number'=> implode(',',$draw_number)];
     //  }catch(TimeoutException  $e){
@@ -127,4 +134,4 @@ require_once('db/db_utils.php');
       // }
       
  
-      $res = fetch_one('');
+      // $res = fetch_one('');

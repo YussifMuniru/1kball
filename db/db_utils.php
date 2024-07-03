@@ -11,7 +11,7 @@ public static $mysqli_db;
 public static function openConnection() : pdo | string {
     try {
         self::$pdo = new PDO (
-            "mysql:host=localhost;dbname=lottery", 
+            "mysql:host=localhost;dbname=track_db", 
             "enzerhub", 
             "enzerhub"
         );
@@ -24,7 +24,7 @@ public static function openConnection() : pdo | string {
 }
 public static function open_db_connection() : mysqli | string {
     try {
-        self::$mysqli_db = new mysqli ("localhost","enzerhub", "enzerhub","lottery");
+        self::$mysqli_db = new mysqli ("localhost","enzerhub", "enzerhub","track_db");
         return self::$mysqli_db;
     } catch (mysqli_sql_exception $e) {
         echo $e->getMessage();
@@ -69,7 +69,7 @@ function  store_draw_number(array $args = []){
   
     try {   
     $db = Database::openConnection();
-     $sql = "INSERT INTO {$table_name} (draw_date,draw_time,draw_number,draw_count,date_created,client,get_time) VALUES (:draw_date,:draw_time,:draw_number,:draw_count,:date_created,:client,:get_time)";
+     $sql = "INSERT INTO {$table_name} (draw_date,lottery_name,draw_time,draw_number,draw_count,date_created,client,get_time) VALUES (:draw_date,:lottery_name,:draw_time,:draw_number,:draw_count,:date_created,:client,:get_time)";
     // Step 1: Fetch the table name from `gamestable_map` where `dtb_id` = 1
 $stmt = $db->prepare($sql);
 $client = '';
@@ -77,6 +77,7 @@ $client = '';
 $stmt->bindParam(":draw_date",    $draw_date);
 $stmt->bindParam(":draw_time",    $draw_time);
 $stmt->bindParam(":draw_number",  $draw_number);
+$stmt->bindParam(":lottery_name",  $args['lottery_name']);
 $stmt->bindParam(":draw_count",   $draw_count);
 $stmt->bindParam(":date_created", $date_created);
 $stmt->bindParam(":client",       $client);
@@ -211,3 +212,5 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   
 }
+
+

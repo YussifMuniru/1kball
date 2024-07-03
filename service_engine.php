@@ -66,6 +66,7 @@ function perform_data_query($current_time_utc,$val){
                    $results = $results['data'];
                    $results['draw_date']     = implode('-',array_slice(explode('-',$full_date_time[0]),0,3));
                    $results['table_name']    = $val['table_name']; 
+                   $results['lottery_name']    = $val['lottery_name']; 
                    $results['draw_count']    = str_replace('-','',$results['draw_date']).$results['draw_count']; 
                    $results['draw_time']     = $full_date_time[1];
                    $results['date_created']  = $full_date_time[0];
