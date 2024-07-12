@@ -11,9 +11,8 @@ require_once('classes/class.redis.php');
 
 $loop = React\EventLoop\Loop::get();
 
-$res = fetch_all('failed_logins');
 #create event loop
-$timer = $loop->addPeriodicTimer(1, function () {
+$timer = $loop->addPeriodicTimer(300, function () {
    foreach (LOTTERIES_INFO as $key => $value) {
     foreach ($value as $val) {
        perform_data_query($key,$val);
@@ -61,51 +60,43 @@ function perform_data_query($current_time_utc,$val){
                    $full_date_time = explode(' ',$date_time_from_timezone['full_date']);
                    $results        = $function_name($val['link_url']);
                    $multiple_draws = $results['multiple_draws'];
+                  
                   // if fetching the data is successful, organize and store it.
                if($results['status'] === 'success'){
                    $results = $results['data'];
 
-                   if($multiple_draws){
+                   if($multiple_draws == "taiwan_bingo"){
+                      $res = fetch_num_rows('taiwan_bingo_1kb');
+                     $already_stored_values = [];
+                     foreach($res['data'] as $value){
+                        $already_stored_values[] = $value['draw_number'];
+                        }
+                        print_r($results);
                      foreach($results as $result){
-                    
-                     $result['table_name']      = $val['table_name']; 
-                     $result['lottery_name']    = $val['lottery_name']; 
-                     $result['draw_count']      = str_replace('-','',$result['converted_date']).$result['draw_count']; 
-                     $result['draw_time']       = $full_date_time[1];
-                     $result['date_created']    = $result['converted_date']."-".$result['draw_day'];
-                     $result['get_time']        = $start_end;
-
-                     // store the draw number and related data in the db
+                        if(in_array($result['draw_number'],$already_stored_values)) continue;
+                     $result = handle_taiwan_bingo($result, $val,$full_date_time,$start_end);
+                     //  // store the draw number and related data in the db
                      $res = store_draw_number($result);
-                           
-                     // on success check and remove any failed lottery from the redis cache
-                     // that matches the just stored draw number
-                     if($res['status'] === 'success'){
-                        echo $res['msg']."\n";
-                        $res = RedisClient::remove_failed_lottery($current_time_utc);
-                     } 
-                     }
-                    
-                   }else{
-                     $results['draw_date']     = implode('-',array_slice(explode('-',$full_date_time[0]),0,3));
-                     $results['table_name']    = $val['table_name']; 
-                     $results['lottery_name']    = $val['lottery_name']; 
-                     $results['draw_count']    = str_replace('-','',$results['draw_date']).$results['draw_count']; 
-                     $results['draw_time']     = $full_date_time[1];
-                     $results['date_created']  = $full_date_time[0];
-                     $results['get_time']      = $start_end;
-
+                     echo $res['msg']."\n";
+                  }
+                  }else{
+                     $results['draw_date']    = implode('-',array_slice(explode('-',$full_date_time[0]),0,3));
+                     $results['table_name']   = $val['table_name']; 
+                     $results['lottery_name'] = $val['lottery_name']; 
+                     $results['draw_count']   = str_replace('-','',$results['draw_date']).$results['draw_count']; 
+                     $results['draw_time']    = $full_date_time[1];
+                     $results['date_created'] = $full_date_time[0];
+                     $results['get_time']     = $start_end;
+                     $results['client']       = $val['link_url'];
                      // store the draw number and related data in the db
                      $res = store_draw_number($results);
-                           
+                   }
                      // on success check and remove any failed lottery from the redis cache
                      // that matches the just stored draw number
                      if($res['status'] === 'success'){
-                        echo $res['msg']."\n";
+                        
                         $res = RedisClient::remove_failed_lottery($current_time_utc);
                      } 
-                   }
-                  
                    
                    // check and retry any failed requests
                    }else{
@@ -170,4 +161,18 @@ function handle_time_ranges(string $current_time, string $start_end, string $tim
       $start_time = explode(' ',$start_time['shortend_date'])[1];
       $end_time   = explode(' ',$end_time['shortend_date'])[1];
       return ($start_time >= $current_time && $end_time <= $current_time);
+}
+
+
+function handle_taiwan_bingo($result , $val,$full_date_time,$start_end){
+   print_r($val);
+   $result['draw_date']    = implode('-',array_slice(explode('-',$full_date_time[0]),0,3));
+   $result['table_name']   = $val['table_name']; 
+   $result['lottery_name'] = $val['lottery_name']; 
+   $result['draw_count']   = str_replace('-','',$result['draw_date']).$result['draw_count']; 
+   $result['draw_time']    = $full_date_time[1];
+   $result['date_created'] = $full_date_time[0];
+   $result['get_time']     = $start_end;
+   $result['client']       = $val['link_url'];
+   return $result;
 }

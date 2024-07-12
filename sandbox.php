@@ -23,6 +23,11 @@ require_once('db/db_utils.php');
     $capabilities = DesiredCapabilities::chrome();
     $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
     $driver = RemoteWebDriver::create($host, $capabilities); 
+
+  //   foreach(LOTTERIES_INFO as $key => $group_lotteries){
+  //   foreach($group_lotteries as $val){} 
+  // }
+
     // // $driver = $driver->get('https://www.taiwanlottery.com/lotto/result/lotto649');
     // // $driver = $driver->get('https://www.taiwanlottery.com/lotto/result/bingo_bingo?searchData=true');
     // // $driver = $driver->get('https://www.taiwanlottery.com/lotto/result/4_d');
@@ -46,40 +51,63 @@ require_once('db/db_utils.php');
     // // $driver = $driver->get('https://www.lotterypost.com/results/ac/bucko/past');
     // // $driver = $driver->get('https://yesplay.bet/lucky-numbers/usa_north_carolina_cash_5/results');
     // // $driver = $driver->get('https://www.coloradolottery.com/en/games/cash5/drawings/');
-    $driver = $driver->get('https://www.lotto.net/german-lotto/results/2024');
-    $wait = new WebDriverWait($driver, 10);
-    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('archive-container')));
-    $parent_element = $parent_element->findElements(WebDriverBy::cssSelector('.results-vsmall'));
-    $final_res = [];
-    foreach($parent_element as $val){
-    $draw_number_parent = $val->findElements(WebDriverBy::cssSelector('.balls li'));
-    $date_of_fetch      = $val->findElement(WebDriverBy::cssSelector('.date'));
-    $day_of_fetch       = $val->findElement(WebDriverBy::cssSelector('.date span'));
-    $remote_week_day     = $day_of_fetch->getText();
-    $remote_date_of_fetch    = str_replace($remote_week_day,"",$date_of_fetch->getText());
-    $draw_number = [];
-   $res = get_time_in_right_zone("Europe/Berlin")['full_date'];
-   $separated_date =  explode('-',explode(" ",$res)[0]);
-   $res = implode('-',array_slice($separated_date,0,3));
-   $new_date_time = new DateTime($res);
-    $date = $new_date_time->format('F jS, Y');
-    $week_day = strtoupper($separated_date[3]);
-    echo "Remote week day is {$remote_week_day} and remote date is {$remote_date_of_fetch} \n";
-    echo "Local week day is {$week_day} and remote date is {$date} \n";
-    foreach ($draw_number_parent as $val) {
+    // $driver = $driver->get('https://www.taiwanlottery.com/lotto/result/bingo_bingo?searchData=true');
+    // $wait = new WebDriverWait($driver, 10);
+    // $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('result-area')));
+    // $parent_elements = $parent_element->findElements(WebDriverBy::cssSelector('.result-item'));
+    // $res = fetch_one('taiwan_bingo_1kb');
+    // print_r($res);
+    // $final_res = [];
+    // foreach ($parent_elements as $parent_element){
+    //     $issue_number   = $parent_element->findElement(WebDriverBy::cssSelector('.result-item-simple-area-period  > .period-title'));
+    //     $issue_number = implode(array_slice(str_split($issue_number->getText()),3,9));
+    //     $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('.result-item-simple-area-ball-container > .ball'));
+    //     $draw_number = [];
+
+    //     foreach ($draw_number_parent as $key => $val) {
+    //       $draw_number[] = $val->getText();
+    //     }
+    //     $draw_number = implode(',',$draw_number);
+    //    // if($res['data']['draw_number'] === $draw_number){
+    //        $final_res[] = ['draw_count' => $issue_number, 'draw_numbers'=> $draw_number];
+    //     // }  
+       
+    // }
+  
+    //      $driver->quit();
+    //      echo json_encode(['data' => $final_res]);
+  //   $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('archive-container')));
+  //   $parent_element = $parent_element->findElements(WebDriverBy::cssSelector('.results-vsmall'));
+  //   $final_res = [];
+  //   foreach($parent_element as $val){
+  //   $draw_number_parent = $val->findElements(WebDriverBy::cssSelector('.balls li'));
+  //   $date_of_fetch      = $val->findElement(WebDriverBy::cssSelector('.date'));
+  //   $day_of_fetch       = $val->findElement(WebDriverBy::cssSelector('.date span'));
+  //   $remote_week_day     = $day_of_fetch->getText();
+  //   $remote_date_of_fetch    = str_replace($remote_week_day,"",$date_of_fetch->getText());
+  //   $draw_number = [];
+  //  $res = get_time_in_right_zone("Europe/Berlin")['full_date'];
+  //  $separated_date =  explode('-',explode(" ",$res)[0]);
+  //  $res = implode('-',array_slice($separated_date,0,3));
+  //  $new_date_time = new DateTime($res);
+  //   $date = $new_date_time->format('F jS, Y');
+  //   $week_day = strtoupper($separated_date[3]);
+  //   echo "Remote week day is {$remote_week_day} and remote date is {$remote_date_of_fetch} \n";
+  //   echo "Local week day is {$week_day} and remote date is {$date} \n";
+  //   foreach ($draw_number_parent as $val) {
      
-      $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
-    }
-   $final_res[] = ['draw_date' => $remote_date_of_fetch, 'draw_day' => $remote_week_day,'draw_count' => '', 'draw_number'=> implode(',',$draw_number)];
-  }
-    $driver->quit();
+  //     $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
+  //   }
+  //  $final_res[] = ['draw_date' => $remote_date_of_fetch, 'draw_day' => $remote_week_day,'draw_count' => '', 'draw_number'=> implode(',',$draw_number)];
+  // }
+
     //  $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('resultsnums')));
     // $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
     // $draw_number = [];
     // foreach ($draw_number_parent as $val) {
     //   $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
     // }
-    echo json_encode($final_res);
+   
 
     //return ['draw_count' => substr($issue_number,-4), 'draw_number'=> implode(',',$draw_number)];
     //  }catch(TimeoutException  $e){
@@ -149,3 +177,8 @@ require_once('db/db_utils.php');
       
  
       // $res = fetch_one('');
+
+      $m = ['m','n','t','d','e'];
+      $n = ['n','t','d','e','s','u'];
+      print_r(array_diff($n,$m));
+      

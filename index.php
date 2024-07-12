@@ -307,23 +307,25 @@ function get_taiwan_bingo($lottery_url){
   try{
     $driver = get_driver($lottery_url);
     $wait = new WebDriverWait($driver, 10);
-     $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('result-item-simple-area')));
+    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('result-area')));
+    $parent_elements = $parent_element->findElements(WebDriverBy::cssSelector('.result-item'));
+    $final_res = [];
+    foreach ($parent_elements as $parent_element){
+        $issue_number   = $parent_element->findElement(WebDriverBy::cssSelector('.result-item-simple-area-period  > .period-title'));
+        $issue_number = implode(array_slice(str_split($issue_number->getText()),3,9));
+        $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('.result-item-simple-area-ball-container > .ball'));
+        $draw_number = [];
+        foreach ($draw_number_parent as $val) {
+          $draw_number[] = $val->getText();
+        }
+        $draw_number = implode(',',$draw_number);
+        $final_res[]   = ['draw_count' => substr($issue_number,-4), 'draw_number'=> $draw_number];
+      }
     
-    $issue_number = $parent_element->findElement(WebDriverBy::cssSelector('.result-item-simple-area-period  > .period-title'));
-    $issue_number = implode(array_slice(str_split($issue_number->getText()),3,9));
 
 
-    $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('.result-item-simple-area-ball-container > .ball'));
-    $draw_number = [];
-    //echo $draw_number_parent->getText();
-    foreach ($draw_number_parent as $key => $val) {
-      # code...
-      $draw_number[] = $val->getText();
-    }
-    
-    
     $driver->quit();
-    return ['status' => 'success', 'data' => ['draw_count' => substr($issue_number,-4), 'draw_number'=> implode(',',$draw_number)]];
+    return ['status' => 'success','multiple_draws' => "taiwan_bingo", 'data' => $final_res];
     }catch(TimeoutException  $e){
     return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
     }catch(NoSuchElementException  $e){
@@ -361,43 +363,44 @@ function get_five_de_oro_5_48($lottery_url){
 }
 function get_sixaus49_6_49($lottery_url){
   try{
-    // $driver = get_driver($lottery_url);
-    // $wait = new WebDriverWait($driver, 10);
-    // $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('balls')));
-    // $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
-    // $draw_number = [];
-    // foreach ($draw_number_parent as $val) {
-    //   # code...
-    //   $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
-    // }
-    // $driver->quit();
     $driver = get_driver($lottery_url);
     $wait = new WebDriverWait($driver, 10);
-    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('archive-container')));
-    $parent_element = $parent_element->findElements(WebDriverBy::cssSelector('.results-vsmall'));
-    $final_res = [];
-    foreach($parent_element as $val){
-    $draw_number_parent = $val->findElements(WebDriverBy::cssSelector('.balls li'));
-    $date_of_fetch      = $val->findElement(WebDriverBy::cssSelector('.date'));
-    $day_of_fetch       = $val->findElement(WebDriverBy::cssSelector('.date span'));
-    $remote_week_day     = $day_of_fetch->getText();
-    $remote_date_of_fetch    = str_replace($remote_week_day,"",$date_of_fetch->getText());
+    $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('balls')));
+    $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
     $draw_number = [];
-   $res = get_time_in_right_zone("Europe/Berlin")['full_date'];
-   $separated_date =  explode('-',explode(" ",$res)[0]);
-   $res = implode('-',array_slice($separated_date,0,3));
-   $new_date_time = new DateTime($res);
-    $date = $new_date_time->format('F jS, Y');
-    $week_day = strtoupper($separated_date[3]);
     foreach ($draw_number_parent as $val) {
-     
+      # code...
       $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
     }
-   $final_res[] = ['draw_date' => $remote_date_of_fetch,'converted_date'=>(new DateTime($remote_date_of_fetch))->format('Y-m-d'), 'draw_day' => $remote_week_day,'draw_count' => '', 'draw_number'=> implode(',',$draw_number)];
-  }
-       $driver->quit();
-       print_r($final_res);
-       return ['status' => 'success','multiple_draws' => true, 'data' => $final_res];
+    $driver->quit();
+    return ['draw_count' => '', 'draw_number'=> implode(',',$draw_number)];
+  //   $driver = get_driver($lottery_url);
+  //   $wait = new WebDriverWait($driver, 10);
+  //   $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::className('archive-container')));
+  //   $parent_element = $parent_element->findElements(WebDriverBy::cssSelector('.results-vsmall'));
+  //   $final_res = [];
+  //   foreach($parent_element as $val){
+  //   $draw_number_parent = $val->findElements(WebDriverBy::cssSelector('.balls li'));
+  //   $date_of_fetch      = $val->findElement(WebDriverBy::cssSelector('.date'));
+  //   $day_of_fetch       = $val->findElement(WebDriverBy::cssSelector('.date span'));
+  //   $remote_week_day     = $day_of_fetch->getText();
+  //   $remote_date_of_fetch    = str_replace($remote_week_day,"",$date_of_fetch->getText());
+  //   $draw_number = [];
+  //   $res = get_time_in_right_zone("Europe/Berlin")['full_date'];
+  //   $separated_date =  explode('-',explode(" ",$res)[0]);
+  //   $res = implode('-',array_slice($separated_date,0,3));
+  //   $new_date_time = new DateTime($res);
+  //   $date = $new_date_time->format('F jS, Y');
+  //   $week_day = strtoupper($separated_date[3]);
+  //   foreach ($draw_number_parent as $val) {
+     
+  //     $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
+  //   }
+  //  $final_res[] = ['draw_date' => $remote_date_of_fetch,'converted_date'=>(new DateTime($remote_date_of_fetch))->format('Y-m-d'), 'draw_day' => $remote_week_day,'draw_count' => '', 'draw_number'=> implode(',',$draw_number)];
+  // }
+  //      $driver->quit();
+  //      print_r($final_res);
+  //      return ['status' => 'success','multiple_draws' => true, 'data' => $final_res];
     }catch(TimeoutException  $e){
     return ['status' => 'error','code' => 1,'data' => 'Timeout']; 
     }catch(NoSuchElementException  $e){
@@ -494,15 +497,17 @@ function get_australia_powerball_7_35($lottery_url){
   try{
       $driver = get_driver($lottery_url);
       $wait = new WebDriverWait($driver, 10);
-      $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::cssSelector('.balls')));
-      $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('li'));
+      $parent_element = $wait->until(WebDriverExpectedCondition::presenceOfElementLocated(WebDriverBy::cssSelector('.elem1')));
+      $draw_number_parent = $parent_element->findElements(WebDriverBy::cssSelector('.balls li'));
+      $draw_count_and_date = $parent_element->findElement(WebDriverBy::cssSelector('.fluid'));
+      $draw_count = explode(' ',explode('-',$draw_count_and_date->getText())[0])[1];
       $draw_number = [];
       foreach ($draw_number_parent as $val) {
         # code...
         $draw_number[] = !is_numeric($val->getText()) ? substr($val->getText(),0,1) : $val->getText();
       }
       $driver->quit();
-      return ['status' => 'success', 'data' =>['draw_count' => '', 'draw_number'=> implode(',',$draw_number)]];
+      return ['status' => 'success', 'data' =>['draw_count' => $draw_count, 'draw_number'=> implode(',',$draw_number)]];
 
     }catch(TimeoutException  $e){
     return ['status' => 'error','code' => 1,'data' => 'Timeout']; 

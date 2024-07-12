@@ -66,13 +66,14 @@ function  store_draw_number(array $args = []){
     $date_created = $args['date_created'];
     $draw_time    = $args['draw_time'];
     $get_time     = $args['get_time'];
+    $client       = $args['client'];
   
     try {   
     $db = Database::openConnection();
      $sql = "INSERT INTO {$table_name} (draw_date,lottery_name,draw_time,draw_number,draw_count,date_created,client,get_time) VALUES (:draw_date,:lottery_name,:draw_time,:draw_number,:draw_count,:date_created,:client,:get_time)";
     // Step 1: Fetch the table name from `gamestable_map` where `dtb_id` = 1
 $stmt = $db->prepare($sql);
-$client = '';
+
 
 $stmt->bindParam(":draw_date",    $draw_date);
 $stmt->bindParam(":draw_time",    $draw_time);
@@ -91,10 +92,10 @@ return ['status' => 'success', 'msg' => "Successfully inserted in {$table_name}.
       return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
     }
 }
-function fetch_all($table_name){
+function fetch_all($table_name, $ordery_by = 'drawid DESC'){
     try {   
     $db = Database::openConnection();
-    $stmt = $db->prepare("SELECT * FROM {$table_name}");
+    $stmt = $db->prepare("SELECT * FROM {$table_name} ORDER BY {$ordery_by}");
     $stmt->execute();
     $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return ['status' => 'success','data' => $res, 'msg' => "Successfully fetched all in {$table_name}."];
@@ -103,10 +104,10 @@ function fetch_all($table_name){
     }
 
 }
-function fetch_one($table_name,string $ordery_by = 'DESC'){
+function fetch_one($table_name, $ordery_by = 'drawid DESC'){
     try {   
     $db = Database::openConnection();
-    $stmt = $db->prepare("SELECT draw_number FROM {$table_name} LIMIT 1 ORDER BY {$ordery_by}");
+    $stmt = $db->prepare("SELECT draw_number FROM {$table_name} ORDER BY {$ordery_by} LIMIT 1");
     $stmt->execute();
     $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return ['status' => 'success','data' => $res];
@@ -115,6 +116,30 @@ function fetch_one($table_name,string $ordery_by = 'DESC'){
     }
 
 }
+function fetch_num_rows($table_name, $num_rows = 15, $ordery_by = 'drawid DESC'){
+    try {   
+    $db = Database::openConnection();
+    $stmt = $db->prepare("SELECT draw_number FROM {$table_name} ORDER BY {$ordery_by} LIMIT $num_rows");
+    $stmt->execute();
+    $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return ['status' => 'success','data' => $res];
+  } catch (\PDOException $e) {
+    return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
+    }
+
+}
+function perform_query($sql){
+    try {   
+    $db = Database::openConnection();
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
+    return ['status' => 'success','data' => ''];
+  } catch (\PDOException $e) {
+    return ['status' => 'error', 'msg' => "Error performing query ".$e->getMessage()];
+    }
+
+};
+
 function insert_a_row($table_name, $columns, $values){
 
     try { 
