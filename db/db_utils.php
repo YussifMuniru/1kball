@@ -52,8 +52,11 @@ function record_failed_lotteries($columns = [],$values){
          if($db->query($sql) === TRUE) {
          return   ['status' => 'success', 'msg' => "Successfully recorded a failed login. "];
         }
+   
     }catch(mysqli_sql_exception $e){
         return ['status' => 'error', 'msg' => "Recording failed for failed logins ". $e->getMessage()];
+    }finally{
+        Database::closeConnection(false);
     }
 }
 
@@ -90,6 +93,8 @@ return ['status' => 'success', 'msg' => "Successfully inserted in {$table_name}.
   } catch (\PDOException $e) {
       log_action('DATABASE_ERROR', $e->getMessage()." Draw number to be stored is {$draw_number}, draw count is: {$draw_count} on line ".__LINE__." in file ".__FILE__);
       return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
+    }finally{
+        Database::closeConnection();
     }
 }
 function fetch_all($table_name, $ordery_by = 'drawid DESC'){
@@ -101,6 +106,8 @@ function fetch_all($table_name, $ordery_by = 'drawid DESC'){
     return ['status' => 'success','data' => $res, 'msg' => "Successfully fetched all in {$table_name}."];
   } catch (\PDOException $e) {
     return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
+    }finally{
+        Database::closeConnection();
     }
 
 }
@@ -113,6 +120,8 @@ function fetch_one($table_name, $ordery_by = 'drawid DESC'){
     return ['status' => 'success','data' => $res];
   } catch (\PDOException $e) {
     return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
+    }finally{
+        Database::closeConnection();
     }
 
 }
@@ -125,6 +134,8 @@ function fetch_num_rows($table_name, $num_rows = 15, $ordery_by = 'drawid DESC')
     return ['status' => 'success','data' => $res];
   } catch (\PDOException $e) {
     return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
+    }finally {
+        Database::closeConnection();
     }
 
 }
@@ -136,6 +147,8 @@ function perform_query($sql){
     return ['status' => 'success','data' => ''];
   } catch (\PDOException $e) {
     return ['status' => 'error', 'msg' => "Error performing query ".$e->getMessage()];
+    }finally{
+        Database::closeConnection();
     }
 
 };
@@ -163,6 +176,8 @@ return ['status' => 'success', 'msg' => "Successfully inserted in {$table_name}.
   } catch (\PDOException $e) {
         //throw $th;
         return ['status' => 'error', 'msg' => "Insertion into {$table_name} error. ".$e->getMessage()];
+    }finally{
+        Database::closeConnection();
     }
 }
 
@@ -175,6 +190,8 @@ function delete_all($table_name){
      $stmt->execute();
     }catch(PDOException $e) {
           return ['status' => 'error', 'msg' => "Deletion from {$table_name} error. ".$e->getMessage()];
+    }finally{
+        Database::closeConnection();
     }
 }
 
@@ -187,17 +204,15 @@ function delete_one($table_name,$id){
       $stmt->execute();
     }catch(PDOException $e) {
           return ['status' => 'error', 'msg' => "Deletion from {$table_name} error. ".$e->getMessage()];
+    }finally{
+        Database::closeConnection();
     }
 }
 function fetchDrawNumbers($lottery_id){
     try{
-         $lottery_id = intval($lottery_id);
-
-     
+    $lottery_id = intval($lottery_id);
     $db = Database::openConnection();
    
-
-    
     // Step 1: Fetch the table name from `gamestable_map` where `dtb_id` = 1
 $stmt = $db->prepare("SELECT draw_table FROM gamestable_map WHERE game_type = :id LIMIT 1");
 $stmt->bindParam(":id", $lottery_id, PDO::PARAM_INT);
@@ -206,10 +221,6 @@ $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if(!$row) return ["draw_periods"=>[],"draw_numberss"=>[]]; 
  $tableName = $row['draw_table'];
-
-
-
-
 
 // Step 2: Dynamically construct and execute a query to fetch data from the determined table
 $query = "SELECT * FROM {$tableName} ORDER BY draw_id DESC LIMIT :limit" ; 
@@ -232,6 +243,8 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }catch(Throwable $th){
         echo"Error: ". $th->getMessage();
         return $th->getMessage();
+    }finally{
+        Database::closeConnection();
     }
 
 

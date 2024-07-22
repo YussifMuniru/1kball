@@ -319,11 +319,12 @@ function get_taiwan_bingo($lottery_url){
           $draw_number[] = $val->getText();
         }
         $draw_number = implode(',',$draw_number);
-        $final_res[]   = ['draw_count' => substr($issue_number,-4), 'draw_number'=> $draw_number];
+        array_unshift($final_res, ['draw_count' => substr($issue_number,-4), 'draw_number'=> $draw_number]);
+       
       }
     
 
-
+    print_r($final_res);
     $driver->quit();
     return ['status' => 'success','multiple_draws' => "taiwan_bingo", 'data' => $final_res];
     }catch(TimeoutException  $e){

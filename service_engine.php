@@ -53,8 +53,7 @@ function perform_data_query($current_time_utc,$val){
                 // get the valid fetch days for the current iteration of the lotteries.
                 $valid_fetch_days = explode(',',trim($val['num_mins_per_period']));
             if(empty(trim($val['num_mins_per_period'])) || in_array($date_details[0],$valid_fetch_days)){
-                   // fetch the latest stored draw number
-                   $res = fetch_one($val['table_name']);
+                   
                    // get and call the appropriate service function
                    $function_name  = "get_".$val['lottery_name'];
                    $full_date_time = explode(' ',$date_time_from_timezone['full_date']);
@@ -66,12 +65,14 @@ function perform_data_query($current_time_utc,$val){
                    $results = $results['data'];
 
                    if($multiple_draws == "taiwan_bingo"){
+                     // fetch the latest stored draw number
+                    //  $res = fetch_one($val['table_name']);
                       $res = fetch_num_rows('taiwan_bingo_1kb');
                      $already_stored_values = [];
                      foreach($res['data'] as $value){
                         $already_stored_values[] = $value['draw_number'];
                         }
-                        print_r($results);
+                      
                      foreach($results as $result){
                         if(in_array($result['draw_number'],$already_stored_values)) continue;
                      $result = handle_taiwan_bingo($result, $val,$full_date_time,$start_end);
@@ -165,7 +166,6 @@ function handle_time_ranges(string $current_time, string $start_end, string $tim
 
 
 function handle_taiwan_bingo($result , $val,$full_date_time,$start_end){
-   print_r($val);
    $result['draw_date']    = implode('-',array_slice(explode('-',$full_date_time[0]),0,3));
    $result['table_name']   = $val['table_name']; 
    $result['lottery_name'] = $val['lottery_name']; 

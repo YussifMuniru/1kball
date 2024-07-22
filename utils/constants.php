@@ -33,8 +33,8 @@ $lotteries_info = [
      
 ];
 
-$lotteries_info = [
-  '23:05' => [['lottery_name'=>'taiwan_bingo','lottery_type' => 'Keno','link_url'=> 'https://www.taiwanlottery.com/lotto/result/bingo_bingo?searchData=true', 'period' => 203,'start_end' => '07:05~23:55','intervals' => 300, 'num_mins_per_period' => '', 'country' => 'taiwan', 'timezone' => 'Asia/Taipei','table_name' => 'taiwan_bingo_1kb']],
-];
+// $lotteries_info = [
+//   '23:05' => [['lottery_name'=>'taiwan_bingo','lottery_type' => 'Keno','link_url'=> 'https://www.taiwanlottery.com/lotto/result/bingo_bingo?searchData=true', 'period' => 203,'start_end' => '07:05~23:55','intervals' => 300, 'num_mins_per_period' => '', 'country' => 'taiwan', 'timezone' => 'Asia/Taipei','table_name' => 'taiwan_bingo_1kb']],
+// ];
  
 !defined('LOTTERIES_INFO') ? define('LOTTERIES_INFO',$lotteries_info) : false;
