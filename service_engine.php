@@ -52,19 +52,19 @@ function perform_data_query($current_time_utc,$val){
          if($valid_fetch_time || true){
                 // get the valid fetch days for the current iteration of the lotteries.
                 $valid_fetch_days = explode(',',trim($val['num_mins_per_period']));
-            if(empty(trim($val['num_mins_per_period'])) || in_array($date_details[0],$valid_fetch_days)){
+            if((empty(trim($val['num_mins_per_period'])) || in_array($date_details[0],$valid_fetch_days)) || true){
                    
                    // get and call the appropriate service function
                    $function_name  = "get_".$val['lottery_name'];
                    $full_date_time = explode(' ',$date_time_from_timezone['full_date']);
                    $results        = $function_name($val['link_url']);
-                   $multiple_draws = $results['multiple_draws'];
-                  
-                  // if fetching the data is successful, organize and store it.
-               if($results['status'] === 'success'){
-                   $results = $results['data'];
+                   print_r($results);
+                   // if fetching the data is successful, organize and store it.
+                   if($results['status'] === 'success'){
+                      $results = $results['data'];
+                      
 
-                   if($multiple_draws == "taiwan_bingo"){
+                   if(isset($results['multiple_draws'])){
                      // fetch the latest stored draw number
                     //  $res = fetch_one($val['table_name']);
                       $res = fetch_num_rows('taiwan_bingo_1kb');
@@ -91,6 +91,7 @@ function perform_data_query($current_time_utc,$val){
                      $results['client']       = $val['link_url'];
                      // store the draw number and related data in the db
                      $res = store_draw_number($results);
+                     print_r($res);
                    }
                      // on success check and remove any failed lottery from the redis cache
                      // that matches the just stored draw number
@@ -114,6 +115,8 @@ function perform_data_query($current_time_utc,$val){
                         // if you have not successfully stored recorded the failed lottery,
                         if (file_put_contents('logs/failed_lotteries_logs.txt', "TIMEOUTEXCEPTION::  {$val['lottery_name']} timed out with a url of ({$val['link_url']}) \n") === false) {
                            echo 'Failed to write data to file.';
+                        }else{
+                           echo "TIMEOUTEXCEPTION::  {$val['lottery_name']} timed out with a url of ({$val['link_url']}) \n";
                         } 
 
                          }else{
@@ -122,9 +125,11 @@ function perform_data_query($current_time_utc,$val){
                        
                      }
                      if($results['code'] === 2){
+                        echo "NOSUCHELEMENTEXCEPTION:: {$val['lottery_name']} elements updated from source. With a url of ({$val['link_url']}) \n";
                        file_put_contents('logs/failed_lotteries_logs.txt', "NOSUCHELEMENTEXCEPTION:: {$val['lottery_name']} elements updated from source. With a url of ({$val['link_url']}) \n");
                      }
                      if($results['code'] === 3){
+                        echo "CURLTIMEOUTEXCEPTION:: {$val['lottery_name']} Curl time out with a url of ({$val['link_url']}) \n";
                         file_put_contents('logs/failed_lotteries_logs.txt', "CURLTIMEOUTEXCEPTION:: {$val['lottery_name']} Curl time out with a url of ({$val['link_url']}) \n");
                      }
                      if($results['code'] === 4){

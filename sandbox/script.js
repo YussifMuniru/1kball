@@ -1,6 +1,7 @@
 $(document).ready(function () {
   // Initialize table with the first dataset
   //   updateTable();
+  $(".dateSelector").flatpickr(optional_config);
 });
 
 function updateTable() {

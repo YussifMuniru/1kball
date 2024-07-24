@@ -2,11 +2,16 @@ body {
   display: flex;
   margin-top: 30px;
   justify-content: center;
-  height: 330vh;
+  height: 85vh;
   background-color: #e8e8e8;
   font-family: "Montserrat", sans-serif;
   font-optical-sizing: auto;
 }
+
+a {
+  height: fit-content;
+}
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -115,3 +120,5 @@ body {
 .save:hover .svg {
   fill: #ced8de;
 }
+
+
