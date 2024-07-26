@@ -155,7 +155,7 @@ require_once('c:/xampp/htdocs/1kball/db/db_utils.php');
       
        foreach($results['data'] as $key => $row){
          
-        echo "<tr><td>{$row['drawid']}</td><td>{$row['lottery_name']}</td><td>{$row['draw_date']}</td><td>{$row['draw_time']}</td><td>{$row['draw_number']}</td><td>{$row['draw_count']}</td><td>{$row['date_created']}</td><td><a href='{$row['client']}' target='_blank'>Visit Client Site</a></td><td>{$row['get_time']}</td></tr>" ;
+        echo "<tr><td>{$row['drawid']}</td><td id='lottery_name'>{$row['lottery_name']}</td><td>{$row['draw_date']}</td><td>{$row['draw_time']}</td><td>{$row['draw_number']}</td><td>{$row['draw_count']}</td><td>{$row['date_created']}</td><td><a href='{$row['client']}' target='_blank'>Visit Client Site</a></td><td>{$row['get_time']}</td></tr>" ;
       }
      }
      }else{
@@ -172,17 +172,47 @@ require_once('c:/xampp/htdocs/1kball/db/db_utils.php');
     //   updateTable();
      const fp = flatpickr("#date-button",{
          mode: "range",
-        dateFormat: "Y-m-d H:i:s",
+         dateFormat: "Y-m-d",
 
         onChange: function(selectedDates, dateStr, instance){
             console.log("Date changed: ", dateStr);
         },
         onClose: function(selectedDates,dateStr,instance){
-            console.log("Picker closed with date: ", dateStr);
+            let tbl = new URLSearchParams(new URL(window.location.href).search);
+            tbl = tbl.get('tbl');
+            if(tbl.length < 5) return;
+             $.ajax({
+                url: `../sandbox/filter.php?date=${dateStr}&tbl=${tbl}`,
+                type: "GET",
+                success: function (response) {
+                    response = JSON.parse(response);
+                    const tableBody = document.getElementById("tableBody");
+                    console.log(response);
+                    if(response.status === 'error'){
+                        alert(response.message);
+                        return;
+                    }
+                    tableBody.innerHTML = "";
+                    console.log(response.data.length);
+                    if(response.data.length < 1) {
+                          tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center;background: #f2f2f2;font-weight: bold;">No results found</td></tr>`;
+                          return;
+                    }
+                    response.data.forEach((row) => {
+                    const tr = document.createElement("tr");
+                    $(tr).append(
+                        `<td>${row.drawid}</td><td>${row.lottery_name}</td><td>${row.draw_date}</td><td>${row.draw_time}</td><td>${row.draw_number}</td><td>${row.draw_count}</td><td>${row.date_created}</td><td><a href='${row.client}' target='_blank'>Visit Client Site</a></td><td>${row.get_time}</td>`
+                    );
+                    tableBody.appendChild(tr);
+                    });
+                },
+                error: function (error) {
+                    console.log("Error: ", error);
+                },
+    });
         }
         
       });
-      console.log(fp.selectedDates);
      });
 
    </script>

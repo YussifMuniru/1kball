@@ -8,3 +8,14 @@ function log_action($action, $message){
      return ['status' => 'error', 'message' => $th->getMessage()];
      }
 }
+
+function convert_to_date_format(string $date_string, string $initial_format, string $resultant_format){
+
+    try{
+        $date = DateTime::createFromFormat($initial_format,$date_string);
+        return $date ? $date->format($resultant_format) : "";
+    }catch(Throwable $th){
+        log_action('Date Formating Error',$th->getMessage()." in file ".__FILE__." on line ".__LINE__);
+        return ['status' => 'error', 'message' => "Server error: Please try again later."];
+    }
+}

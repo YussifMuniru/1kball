@@ -144,7 +144,20 @@ function perform_query($sql){
     $db = Database::openConnection();
     $stmt = $db->prepare($sql);
     $stmt->execute();
-    return ['status' => 'success','data' => ''];
+  } catch (\PDOException $e) {
+    return ['status' => 'error', 'msg' => "Error performing query ".$e->getMessage()];
+    }finally{
+        Database::closeConnection();
+    }
+
+};
+function fetch_with_sql($sql){
+    try {   
+    $db = Database::openConnection();
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
+    $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return ['status' => 'success','data' => $res];
   } catch (\PDOException $e) {
     return ['status' => 'error', 'msg' => "Error performing query ".$e->getMessage()];
     }finally{

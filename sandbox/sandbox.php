@@ -15,7 +15,6 @@ require_once("../utils/constants.php");
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <!-- <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>   -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="script.js"></script>
 </head>
@@ -48,7 +47,7 @@ require_once("../utils/constants.php");
            
     });
     }
-     $('#grid').append(cardsHtml);
+   $('#grid').append(cardsHtml);
    console.log(lotteryNames);
   
 
